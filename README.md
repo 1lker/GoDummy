@@ -1,3 +1,4 @@
+```markdown
 super-dummy-data-generator/
 ├── cmd/
 │   └── dummydata/
@@ -61,3 +62,4 @@ super-dummy-data-generator/
 ├── .gitignore                     # Git ignore file
 ├── README.md                      # Project documentation
 └── LICENSE                        # License file
+```
