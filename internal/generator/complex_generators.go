@@ -177,7 +177,7 @@ func generateFileName(f *gofakeit.Faker) string {
 	return strings.Join(words, "_")
 }
 
-func generateTransaction()
+
 
 func generateFileExtension(f *gofakeit.Faker) string {
 	extensions := []string{"txt", "pdf", "doc", "docx", "xls", "xlsx", "jpg", "png", "mp3", "mp4"}

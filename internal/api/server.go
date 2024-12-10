@@ -87,6 +87,8 @@ func (s *Server) SetupRoutes() {
 			generate.POST("/product", s.handler.HandleGenerateDetailedProducts)
 			generate.POST("/payment", s.handler.HandleGeneratePayments)
 			generate.POST("/creditcard", s.handler.HandleGenerateCreditCards)
+			generate.POST("/transaction", s.handler.HandleGenerateTransactions)
+			generate.POST("/transaction/batch", s.handler.HandleGenerateBatchTransactions)
 			
 			// Internet & Technology
 			generate.POST("/internet", s.handler.HandleGenerateInternetInfo)

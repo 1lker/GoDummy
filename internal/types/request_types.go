@@ -126,3 +126,14 @@ type TransactionRequest struct {
 	Status string `json:"status,omitempty"`
 	Type   string `json:"type,omitempty"`
 }
+
+// BatchTransactionRequest represents a request for generating batch transactions
+type BatchTransactionRequest struct {
+	BatchCount  int     `json:"batch_count" binding:"required,gt=0"`
+	BatchSize   int     `json:"batch_size" binding:"required,gt=0"`
+	MinAmount   float64 `json:"min_amount,omitempty"`
+	MaxAmount   float64 `json:"max_amount,omitempty"`
+	Currency    string  `json:"currency,omitempty"`
+	Type        string  `json:"type,omitempty"`
+	Status      string  `json:"status,omitempty"`
+}
