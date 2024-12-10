@@ -1,0 +1,13 @@
+{
+    "server": {
+      "port": 8080,
+      "host": "localhost",
+      "mode": "debug",
+      "allowed_origins": "*"
+    },
+    "api": {
+      "rate_limit": 120,
+      "timeout_seconds": 10,
+      "max_request_size": 1048576
+    }
+  }
