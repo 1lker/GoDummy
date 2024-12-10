@@ -91,3 +91,14 @@ curl -X POST http://localhost:8080/api/v1/generate/batch \
       }
     ]
   }'
+
+
+
+curl -X POST http://localhost:8080/api/v1/generate/person \
+  -H "Content-Type: application/json" \
+  -d '{
+    "count": 2,
+    "gender": "female",
+    "min_age": 20,
+    "max_age": 30
+  }'

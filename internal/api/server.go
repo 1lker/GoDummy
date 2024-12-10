@@ -74,21 +74,34 @@ func (s *Server) SetupRoutes() {
 			generate.POST("/string", s.handler.HandleGenerateStrings)
 			generate.POST("/bool", s.handler.HandleGenerateBooleans)
 			
-			// Complex types
-			generate.POST("/date", s.handler.HandleGenerateDates)
+			// Personal information
+			generate.POST("/person", s.handler.HandleGeneratePerson)
+			generate.POST("/name", s.handler.HandleGenerateNames)
 			generate.POST("/email", s.handler.HandleGenerateEmails)
 			generate.POST("/phone", s.handler.HandleGeneratePhones)
-			
-			// New complex types
 			generate.POST("/address", s.handler.HandleGenerateAddresses)
-			generate.POST("/creditcard", s.handler.HandleGenerateCreditCards)
+			
+			// Business data
 			generate.POST("/company", s.handler.HandleGenerateCompanies)
+			generate.POST("/job", s.handler.HandleGenerateJob)
+			generate.POST("/product", s.handler.HandleGenerateDetailedProducts)
+			generate.POST("/payment", s.handler.HandleGeneratePayments)
+			
+			// Internet & Technology
+			generate.POST("/internet", s.handler.HandleGenerateInternetInfo)
+			generate.POST("/file", s.handler.HandleGenerateFiles)
+			generate.POST("/vehicle", s.handler.HandleGenerateVehicles)
+			generate.POST("/location", s.handler.HandleGenerateLocations)
+			
+			// Custom generation
+			generate.POST("/custom", s.handler.HandleGenerateCustom)
 			
 			// Batch generation
 			generate.POST("/batch", s.handler.HandleBatchGenerate)
 		}
 	}
 }
+
 
 func (s *Server) Start() error {
 	// Setup middleware and routes

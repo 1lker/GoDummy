@@ -2,161 +2,311 @@ package generator
 
 import (
 	"fmt"
-	"math/rand"
 	"time"
 	"strings"
+	"github.com/brianvoe/gofakeit/v6"
+	"github.com/1lker/sd-gen-o2/internal/types"
 )
 
 type Generator struct {
-	rand *rand.Rand
-	// Pre-defined data for generating realistic values
-	domains     []string
-	firstNames  []string
-	lastNames   []string
-	tlds        []string
-	areaCodes   []string
+    faker *gofakeit.Faker
 }
 
 func New() *Generator {
-	source := rand.NewSource(time.Now().UnixNano())
-	
-	return &Generator{
-		rand: rand.New(source),
-		domains: []string{"gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "example.com"},
-		firstNames: []string{"James", "John", "Robert", "Michael", "William", "David", "Mary", "Patricia", "Jennifer", "Linda"},
-		lastNames: []string{"Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez"},
-		tlds: []string{"com", "net", "org", "io", "dev"},
-		areaCodes: []string{"201", "202", "212", "213", "301", "302", "303", "304", "305", "310"},
-	}
+    return &Generator{
+        faker: gofakeit.New(time.Now().UnixNano()),
+    }
 }
 
 // Basic type generators
-
 func (g *Generator) GenerateInt(min, max int) int {
-	return g.rand.Intn(max-min+1) + min
+	return g.faker.IntRange(min, max)
 }
 
 func (g *Generator) GenerateFloat(min, max float64) float64 {
-	return min + g.rand.Float64()*(max-min)
+	return g.faker.Float64Range(min, max)
 }
 
 func (g *Generator) GenerateString(length int) string {
-	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	letters := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	result := make([]byte, length)
 	for i := range result {
-		result[i] = charset[g.rand.Intn(len(charset))]
+		result[i] = letters[g.faker.IntRange(0, len(letters)-1)]
 	}
 	return string(result)
 }
 
 func (g *Generator) GenerateBool() bool {
-	return g.rand.Intn(2) == 1
+	return g.faker.Bool()
 }
 
 // Complex type generators
-
-func (g *Generator) GenerateDate(startYear, endYear int) string {
-	if startYear >= endYear {
-		startYear, endYear = endYear, startYear
+func (g *Generator) GenerateAddress() types.Address {
+	return types.Address{
+		Street:  fmt.Sprintf("%d %s %s", g.faker.IntRange(100, 9999), g.faker.LastName(), "Street"),
+		City:    g.faker.City(),
+		State:   g.faker.State(),
+		ZipCode: fmt.Sprintf("%05d", g.faker.IntRange(10000, 99999)),
+		Country: g.faker.Country(),
 	}
-	
-	year := g.rand.Intn(endYear-startYear+1) + startYear
-	month := g.rand.Intn(12) + 1
-	
-	// Calculate max days for the month
-	maxDays := 31
-	if month == 2 {
-		if year%4 == 0 && (year%100 != 0 || year%400 == 0) {
-			maxDays = 29
-		} else {
-			maxDays = 28
-		}
-	} else if month == 4 || month == 6 || month == 9 || month == 11 {
-		maxDays = 30
-	}
-	
-	day := g.rand.Intn(maxDays) + 1
-	
-	return fmt.Sprintf("%04d-%02d-%02d", year, month, day)
 }
 
-func (g *Generator) GenerateEmail() string {
-	// Generate username part
-	firstName := g.firstNames[g.rand.Intn(len(g.firstNames))]
-	lastName := g.lastNames[g.rand.Intn(len(g.lastNames))]
-	number := g.rand.Intn(100)
+func (g *Generator) GenerateCreditCard() types.CreditCard {
+	ccTypes := []string{"VISA", "MASTERCARD", "AMEX", "DISCOVER"}
+	cardType := ccTypes[g.faker.IntRange(0, len(ccTypes)-1)]
 	
-	// Get random domain
-	domain := g.domains[g.rand.Intn(len(g.domains))]
-	
-	// Create email
-	return fmt.Sprintf("%s.%s%d@%s", 
-		firstName,
-		lastName,
-		number,
-		domain,
-	)
+	return types.CreditCard{
+		Number: generateCCNumber(g.faker, cardType),
+		Expiry: fmt.Sprintf("%02d/%d", g.faker.IntRange(1, 12), g.faker.IntRange(23, 28)),
+		CVV:    fmt.Sprintf("%03d", g.faker.IntRange(100, 999)),
+		Type:   cardType,
+	}
 }
 
-func (g *Generator) GeneratePhone() string {
-	// Get random area code
-	areaCode := g.areaCodes[g.rand.Intn(len(g.areaCodes))]
+func (g *Generator) GenerateCompany() types.Company {
+	industries := []string{"Technology", "Healthcare", "Finance", "Manufacturing", "Retail", "Education"}
+	companyTypes := []string{"Corp.", "Inc.", "LLC", "Ltd."}
 	
-	// Generate remaining digits
-	prefix := g.rand.Intn(900) + 100  // 100-999
-	lineNum := g.rand.Intn(10000)     // 0000-9999
-	
-	return fmt.Sprintf("+1-%s-%03d-%04d", areaCode, prefix, lineNum)
+	return types.Company{
+		Name:        fmt.Sprintf("%s %s", g.faker.LastName(), companyTypes[g.faker.IntRange(0, len(companyTypes)-1)]),
+		Industry:    industries[g.faker.IntRange(0, len(industries)-1)],
+		Type:        companyTypes[g.faker.IntRange(0, len(companyTypes)-1)],
+		Description: g.faker.Sentence(10),
+		Website:     g.faker.URL(),
+	}
 }
 
 func (g *Generator) GenerateName() string {
-	firstName := g.firstNames[g.rand.Intn(len(g.firstNames))]
-	lastName := g.lastNames[g.rand.Intn(len(g.lastNames))]
-	return fmt.Sprintf("%s %s", firstName, lastName)
+	return fmt.Sprintf("%s %s", g.faker.FirstName(), g.faker.LastName())
+}
+
+func (g *Generator) GenerateEmail() string {
+	return g.faker.Email()
+}
+
+func (g *Generator) GeneratePhone() string {
+	return g.faker.Phone()
+}
+
+func (g *Generator) GenerateDate(startYear, endYear int) string {
+	start := time.Date(startYear, 1, 1, 0, 0, 0, 0, time.UTC)
+	end := time.Date(endYear, 12, 31, 23, 59, 59, 0, time.UTC)
+	return g.faker.DateRange(start, end).Format("2006-01-02")
+}
+
+// Additional data types
+func (g *Generator) GenerateSSN() types.SSN {
+	ssn := fmt.Sprintf("%03d-%02d-%04d", 
+		g.faker.IntRange(100, 999),
+		g.faker.IntRange(10, 99),
+		g.faker.IntRange(1000, 9999))
+	
+	return types.SSN{
+		Number:       ssn,
+		IsValid:     true,
+		MaskedNumber: "xxx-xx-" + ssn[7:],
+	}
+}
+
+func (g *Generator) GenerateISBN() types.ISBN {
+	// Generate ISBN-10
+	isbn10 := generateISBN10(g.faker)
+	// Generate ISBN-13
+	isbn13 := generateISBN13(g.faker)
+	
+	return types.ISBN{
+		ISBN10:  isbn10,
+		ISBN13:  isbn13,
+		IsValid: true,
+	}
 }
 
 func (g *Generator) GenerateUsername() string {
-	firstName := g.firstNames[g.rand.Intn(len(g.firstNames))]
-	number := g.rand.Intn(1000)
-	return fmt.Sprintf("%s%d", strings.ToLower(firstName), number)
+	return g.faker.Username()
 }
 
 func (g *Generator) GeneratePassword(length int) string {
-	if length < 8 {
-		length = 8 // Minimum password length
+	chars := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*"
+	result := make([]byte, length)
+	for i := range result {
+		result[i] = chars[g.faker.IntRange(0, len(chars)-1)]
+	}
+	return string(result)
+}
+
+// Additional useful generators
+func (g *Generator) GenerateJobInfo() map[string]string {
+	return map[string]string{
+		"title":       g.faker.JobTitle(),
+		"description": g.faker.Sentence(15),
+		"level":       g.faker.RandomString([]string{"Entry", "Junior", "Senior", "Lead", "Manager"}),
+		"company":     g.GenerateCompany().Name,
+	}
+}
+
+func (g *Generator) GenerateProduct() map[string]interface{} {
+	return map[string]interface{}{
+		"name":        fmt.Sprintf("%s %s", g.faker.Word(), g.faker.Word()),
+		"category":    g.faker.RandomString([]string{"Electronics", "Clothing", "Food", "Books", "Tools"}),
+		"description": g.faker.Sentence(10),
+		"price":       g.faker.Float64Range(1, 1000),
+		"sku":         g.faker.UUID(),
+	}
+}
+
+func (g *Generator) GenerateCarInfo() map[string]string {
+	carMakers := []string{"Toyota", "Honda", "Ford", "BMW", "Mercedes", "Audi"}
+	fuelTypes := []string{"Gasoline", "Diesel", "Electric", "Hybrid"}
+	transmissions := []string{"Automatic", "Manual", "CVT"}
+	
+	return map[string]string{
+		"make":         carMakers[g.faker.IntRange(0, len(carMakers)-1)],
+		"model":        g.faker.Word(),
+		"year":         fmt.Sprintf("%d", g.faker.IntRange(1990, 2024)),
+		"fuel":         fuelTypes[g.faker.IntRange(0, len(fuelTypes)-1)],
+		"transmission": transmissions[g.faker.IntRange(0, len(transmissions)-1)],
+	}
+}
+
+func (g *Generator) GenerateInternetInfo() map[string]string {
+	return map[string]string{
+		"url":      g.faker.URL(),
+		"ipv4":     g.faker.IPv4Address(),
+		"ipv6":     g.faker.IPv6Address(),
+		"username": g.faker.Username(),
+		"domain":   g.faker.DomainName(),
+		"mac":      generateMACAddress(g.faker),
+	}
+}
+
+func (g *Generator) GenerateFile() map[string]string {
+	extensions := []string{".txt", ".pdf", ".doc", ".jpg", ".png", ".mp3"}
+	mimeTypes := map[string]string{
+		".txt": "text/plain",
+		".pdf": "application/pdf",
+		".doc": "application/msword",
+		".jpg": "image/jpeg",
+		".png": "image/png",
+		".mp3": "audio/mpeg",
 	}
 	
-	const (
-		lowerChars = "abcdefghijklmnopqrstuvwxyz"
-		upperChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-		numbers    = "0123456789"
-		special    = "!@#$%^&*"
-	)
-	
-	// Ensure at least one of each type
-	password := make([]byte, length)
-	password[0] = lowerChars[g.rand.Intn(len(lowerChars))]
-	password[1] = upperChars[g.rand.Intn(len(upperChars))]
-	password[2] = numbers[g.rand.Intn(len(numbers))]
-	password[3] = special[g.rand.Intn(len(special))]
-	
-	// Fill the rest randomly
-	for i := 4; i < length; i++ {
-		allChars := lowerChars + upperChars + numbers + special
-		password[i] = allChars[g.rand.Intn(len(allChars))]
+	ext := extensions[g.faker.IntRange(0, len(extensions)-1)]
+	return map[string]string{
+		"name":      fmt.Sprintf("%s%s", g.faker.Word(), ext),
+		"extension": ext,
+		"mime":      mimeTypes[ext],
+		"size":      fmt.Sprintf("%dKB", g.faker.IntRange(1, 10000)),
 	}
+}
+
+func (g *Generator) GenerateColor() map[string]string {
+	colors := []string{"red", "blue", "green", "yellow", "purple", "orange"}
+	hexColors := []string{"#FF0000", "#0000FF", "#00FF00", "#FFFF00", "#800080", "#FFA500"}
+	rgbColors := []string{"rgb(255,0,0)", "rgb(0,0,255)", "rgb(0,255,0)", "rgb(255,255,0)", "rgb(128,0,128)", "rgb(255,165,0)"}
 	
-	// Shuffle the password
-	for i := len(password) - 1; i > 0; i-- {
-		j := g.rand.Intn(i + 1)
-		password[i], password[j] = password[j], password[i]
+	index := g.faker.IntRange(0, len(colors)-1)
+	return map[string]string{
+		"name": colors[index],
+		"hex":  hexColors[index],
+		"rgb":  rgbColors[index],
 	}
-	
-	return string(password)
 }
 
 // Helper functions
+func generateCCNumber(f *gofakeit.Faker, cardType string) string {
+	prefixes := map[string]string{
+		"VISA": "4",
+		"MASTERCARD": "5",
+		"AMEX": "37",
+		"DISCOVER": "6011",
+	}
+	
+	prefix := prefixes[cardType]
+	length := 16
+	if cardType == "AMEX" {
+		length = 15
+	}
+	
+	number := prefix
+	for i := len(prefix); i < length; i++ {
+		number += fmt.Sprintf("%d", f.IntRange(0, 9))
+	}
+	
+	return number
+}
 
-func (g *Generator) randomChoice(items []string) string {
-	return items[g.rand.Intn(len(items))]
+func generateMACAddress(f *gofakeit.Faker) string {
+	mac := make([]string, 6)
+	for i := range mac {
+		mac[i] = fmt.Sprintf("%02X", f.IntRange(0, 255))
+	}
+	return strings.Join(mac, ":")
+}
+
+func generateISBN10(f *gofakeit.Faker) string {
+	digits := make([]int, 9)
+	for i := range digits {
+		digits[i] = f.IntRange(0, 9)
+	}
+	
+	// Calculate check digit
+	sum := 0
+	for i := 0; i < 9; i++ {
+		sum += digits[i] * (10 - i)
+	}
+	checkDigit := (11 - (sum % 11)) % 11
+	
+	isbn := ""
+	for _, d := range digits {
+		isbn += fmt.Sprintf("%d", d)
+	}
+	if checkDigit == 10 {
+		isbn += "X"
+	} else {
+		isbn += fmt.Sprintf("%d", checkDigit)
+	}
+	
+	return isbn
+}
+
+func generateISBN13(f *gofakeit.Faker) string {
+	prefix := "978"
+	digits := make([]int, 9)
+	for i := range digits {
+		digits[i] = f.IntRange(0, 9)
+	}
+	
+	// Calculate check digit
+	sum := 0
+	weights := []int{1, 3}
+	
+	// Add prefix digits
+	for i, d := range prefix {
+		digit := int(d - '0')
+		sum += digit * weights[i%2]
+	}
+	
+	// Add remaining digits
+	for i, d := range digits {
+		sum += d * weights[(i+3)%2]
+	}
+	
+	checkDigit := (10 - (sum % 10)) % 10
+	
+	isbn := prefix
+	for _, d := range digits {
+		isbn += fmt.Sprintf("%d", d)
+	}
+	isbn += fmt.Sprintf("%d", checkDigit)
+	
+	return isbn
+}
+
+// GenerateMultiple generates multiple instances of the given generator function
+func (g *Generator) GenerateMultiple(count int, generator func() interface{}) []interface{} {
+    results := make([]interface{}, count)
+    for i := 0; i < count; i++ {
+        results[i] = generator()
+    }
+    return results
 }

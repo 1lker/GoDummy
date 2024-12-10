@@ -6,7 +6,7 @@
       "allowed_origins": "*"
     },
     "api": {
-      "rate_limit": 120,
+      "rate_limit": 120000,
       "timeout_seconds": 10,
       "max_request_size": 1048576
     }

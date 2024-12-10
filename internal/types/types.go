@@ -71,11 +71,3 @@ type Response struct {
 	Message string      `json:"message,omitempty"`
 	Meta    *MetaData   `json:"meta,omitempty"`
 }
-
-// MetaData contains additional information about the response
-type MetaData struct {
-	Count      int       `json:"count,omitempty"`
-	Types      []string  `json:"types,omitempty"`
-	TimeStamp  string    `json:"timestamp,omitempty"`
-	Parameters interface{} `json:"parameters,omitempty"`
-}

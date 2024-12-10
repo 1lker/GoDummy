@@ -2,7 +2,10 @@ module github.com/1lker/sd-gen-o2
 
 go 1.21
 
-require github.com/gin-gonic/gin v1.9.1
+require (
+	github.com/brianvoe/gofakeit/v6 v6.28.0
+	github.com/gin-gonic/gin v1.9.1
+)
 
 require (
 	github.com/bytedance/sonic v1.9.1 // indirect
