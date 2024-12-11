@@ -102,3 +102,40 @@ curl -X POST http://localhost:8080/api/v1/generate/person \
     "min_age": 20,
     "max_age": 30
   }'
+
+
+curl --location 'http://localhost:8080/api/v1/generate/creditcard' \
+--header 'Content-Type: application/json' \
+--data '{
+    "count": 2,
+    "card_type": "VISA"
+  }'
+
+
+
+curl --location 'http://localhost:8080/api/v1/generate/transaction/batch' \
+--header 'Content-Type: application/json' \
+--data '{
+    "batch_count": 2,
+    "batch_size": 3,
+    "base_request": {
+      "min_amount": 1000,
+      "max_amount": 5000,
+      "currency": "USD",
+      "type": "transfer"
+    }
+  }'
+
+
+
+curl --location 'http://localhost:8080/api/v1/generate/transaction' \
+--header 'Content-Type: application/json' \
+--data '{
+    "count": 5,
+    "min_amount": 100,
+    "max_amount": 1000,
+    "currency": "USD",
+    "status": "completed",
+    "type": "payment"
+  }'
+
